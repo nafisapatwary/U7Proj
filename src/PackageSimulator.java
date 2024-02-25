@@ -74,17 +74,18 @@ public class PackageSimulator {
     }
 
     public String getSimulationInfo() {
-        String info = "";
+        String info = "\nRandomly Generated Packages info:";
         for (int i = 0; i < packages.size(); i++) {
-            info += "\nRandomly Generated Packages info:\nPackage " + (i + 1) + ":__________________________________________" +
+            info += "\nPackage " + (i + 1) + ":__________________________________________" +
                     "\nOrigin address: " + packages.get(i).getOrigin() +
                     "\nDestination address: 123 " + packages.get(i).getDestination() +
                     "\nWeight: " + packages.get(i).getWeight() + " pounds" +
                     "\nHeight: " + packages.get(i).getHeight() + " inches" +
                     "\nLength: " + packages.get(i).getLength() + " inches" +
                     "\nWidth: " + packages.get(i).getWidth() + " inches" +
-                    "\nCost: " + generateCost(packages.get(i));
+                    "\nCost: " + generateCost(packages.get(i)) + "\n";
         }
+        info += "\nTotal Cost: " + generateTotalCost();
         return info;
     }
 
