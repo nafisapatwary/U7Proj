@@ -1,64 +1,78 @@
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Scanner;
+
 public class PackageSimulator {
     private ArrayList<Package> packages = new ArrayList<Package>();
 
-    public void generatePackages(int num){
-       for (int i = 0; i < num; i++){
-           //ZIP 1
-           String zip1 = "";
-           for (int j = 0; j < 5; j++) {
-               zip1 += (int) (Math.random() * 10);
-           }
-           while (!checkValidity(zip1)) {
-               zip1 = "";
-               for (int n = 0; n < 5; n++) {
-                   zip1 += (int) (Math.random() * 10);
-               }
-           }
-           //ZIP 2
-           String zip2 = "";
-           for (int j = 0; j < 5; j++) {
-               zip2 += (int) (Math.random() * 10);
-           }
-           while (!checkValidity(zip2)) {
-               zip2 = "";
-               for (int n = 0; n < 5; n++) {
-                   zip2 += (int) (Math.random() * 10);
-               }
-           }
-
-           double w = 0;
-           boolean overweight = ((int)(Math.random() * 5)) < 2; //25% chance
-           //fed ex max weight is 150 pounds
-           if (overweight){
-               w = (Math.random() * 111 + 40);
-           }
-           else{
-               w = (Math.random() * 40);
-           }
-
-           //online it says the standard box measures 17 inch by 12 inch by 12 inch
-           //USPS will only ship packages that are at least 6 inches in length, 3 inches in height, and 0.25 inches in width
-
-           double l = (Math.random() * 24 + 6);
-           double h = (Math.random() * 27 + 3);
-           double wi = (Math.random() * 29 + 1);
-
-           Address ad1 = new Address("123", "Random Street", "3C", "City", "State", zip1);
-           Address ad2 = new Address("123", "Random Street", "3C", "City", "State", zip2);
-           Package p = new Package(ad1, ad2, w, l, h, wi);
-           packages.add(p);
-        }
-    }
-
-    public boolean checkValidity(String z){
-         //zip codes cannot be entirely made up of only 1 unique digit (?)
-        for (int i = 0; i < z.length() - 1; i++) {
-            if (z.charAt(i) != z.charAt(i+1)) {
-                return true;
+    public void generatePackages(int num) throws FileNotFoundException {
+        File zipCodes = new File("Data/zipCodes");
+        for (int i = 0; i < num; i++) {
+            Scanner s1 = null;
+            Scanner s2 = null;
+            try {
+                s1 = new Scanner(zipCodes);
+                s2 = new Scanner(zipCodes);
+            } catch (FileNotFoundException e) {
+                System.exit(1);
             }
+
+            String zip1 = "";
+            int zip1idx = (int) (Math.random() * 42735);
+            for (int j = 0; j < zip1idx + 1; j++) {
+                zip1 = s1.nextLine();
+            }
+
+            String zip2 = "";
+            int zip2idx = (int) (Math.random() * 42735);
+            for (int n = 0; n < zip2idx; n++) {
+                zip2 = s2.nextLine();
+            }
+
+            Address ad1 = new Address("123", "Not A Real Street", "1A", "City", "State", zip1);
+            Address ad2 = new Address("123", "Not A Real Street", "1A", "City", "State", zip2);
+            //randomize weight
+            double weight = 0;
+            boolean overweight = ((int)(Math.random() * 4)) < 1; //20% chance
+            if (overweight) {
+                //USPS max weight is 70 pounds
+                weight = (Math.random() * 30) + 40;
+            } else {
+                weight = (Math.random() * 39.9) + 0.1;
+            }
+
+            //online it says the standard box measures 17 inch by 12 inch by 12 inch
+            //so lets say the average box measures between 2 inches on each side to 20 inches on each side
+            //and there's a smaller chance that a side would be greater than 20, but not more than 27 inches
+            boolean longL = ((int)(Math.random() * 4)) < 1;
+            boolean longH = ((int)(Math.random() * 4)) < 1;
+            boolean longW = ((int)(Math.random() * 4)) < 1;
+            double l = 0;
+            double h = 0;
+            double w = 0;
+
+            //randomizing dimensions
+            if (longL) {
+                l = (Math.random() * 8) + 20;
+            } else {
+                l = (Math.random() * 19) + 2;
+            }
+
+            if (longH) {
+                h = (Math.random() * 8) + 20;
+            } else {
+                h = (Math.random() * 19) + 2;
+            }
+
+            if (longW) {
+                w = (Math.random() * 8) + 20;
+            } else {
+                w = (Math.random() * 19) + 2;
+            }
+
+            Package p = new Package(ad1, ad2, weight, l, h, w);
+            packages.add(p);
         }
-        return false;
     }
 
     public double generateCost(Package p){
@@ -70,6 +84,7 @@ public class PackageSimulator {
         for (Package p: packages){
             cost += PostageCalculator.calculatePostage(p);
         }
+        cost = Math.round(cost * 100.0) / 100.0;
         return cost;
     }
 
@@ -92,4 +107,7 @@ public class PackageSimulator {
     public void resetSimulation(){
         packages = new ArrayList<Package>();
     }
+
+
+
 }
